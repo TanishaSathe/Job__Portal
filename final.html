@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Premium Job Portal</title>
+
+<style>
+body {
+  font-family: 'Segoe UI', sans-serif;
+  margin: 0;
+  background: linear-gradient(135deg, #0f172a, #1e293b);
+  color: #e5e7eb;
+}
+
+.navbar {
+  background: rgba(255,255,255,0.05);
+  backdrop-filter: blur(10px);
+  padding: 15px 40px;
+  display: flex;
+  justify-content: space-between;
+}
+
+.logo {
+  font-size: 22px;
+  font-weight: bold;
+  color: #60a5fa;
+}
+
+.search-bar {
+  margin: 20px auto;
+  width: 85%;
+  display: flex;
+  gap: 10px;
+  background: rgba(255,255,255,0.05);
+  padding: 12px;
+  border-radius: 12px;
+}
+
+.search-bar input {
+  flex: 1;
+  padding: 10px;
+  border: none;
+  background: transparent;
+  color: white;
+}
+
+.search-bar button {
+  background: linear-gradient(135deg,#3b82f6,#6366f1);
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 8px;
+}
+
+.main {
+  display: flex;
+  gap: 20px;
+  width: 85%;
+  margin: auto;
+}
+
+.sidebar {
+  width: 25%;
+  background: rgba(255,255,255,0.05);
+  padding: 20px;
+  border-radius: 12px;
+}
+
+.jobs {
+  width: 75%;
+}
+
+.job {
+  background: rgba(255,255,255,0.05);
+  padding: 18px;
+  margin-bottom: 15px;
+  border-radius: 12px;
+  border: 1px solid rgba(255,255,255,0.1);
+  transition: 0.2s;
+}
+
+.job:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 10px 25px rgba(0,0,0,0.3);
+}
+
+.tag {
+  background: rgba(59,130,246,0.2);
+  padding: 4px 10px;
+  border-radius: 20px;
+  font-size: 12px;
+  margin-right: 5px;
+}
+
+.apply-btn {
+  margin-top: 10px;
+  background: linear-gradient(135deg,#3b82f6,#6366f1);
+  color: white;
+  border: none;
+  padding: 8px 14px;
+  border-radius: 6px;
+}
+
+/* Modal */
+.modal {
+  display: none;
+  position: fixed;
+  top:0;
+  left:0;
+  width:100%;
+  height:100%;
+  background: rgba(0,0,0,0.7);
+  justify-content:center;
+  align-items:center;
+}
+
+.modal-content {
+  background: rgba(255,255,255,0.1);
+  backdrop-filter: blur(15px);
+  padding: 25px;
+  border-radius: 12px;
+  width: 320px;
+}
+
+.modal-content input {
+  width: 100%;
+  padding: 10px;
+  border: none;
+  margin-bottom: 10px;
+  border-radius: 6px;
+}
+</style>
+
+</head>
+
+<body>
+
+<div class="navbar">
+  <div class="logo">JobPortal</div>
+  <div id="authSection">
+    <span onclick="openLogin()" style="cursor:pointer">Login</span> |
+    <span onclick="openRegister()" style="cursor:pointer">Register</span>
+  </div>
+</div>
+
+<div class="search-bar">
+  <input type="text" id="title" placeholder="Search jobs">
+  <input type="text" id="location" placeholder="Location">
+  <button onclick="filterJobs()">Search</button>
+</div>
+
+<div class="main">
+
+<div class="sidebar">
+<h4>🔎 Filters</h4>
+<label><input type="checkbox" value="Remote" onchange="filterJobs()"> 🌍 Remote</label><br><br>
+<label><input type="checkbox" value="Full-time" onchange="filterJobs()"> 🕒 Full-time</label>
+</div>
+
+<div class="jobs" id="jobList"></div>
+
+</div>
+
+<!-- Apply Modal -->
+
+<div class="modal" id="modal">
+  <div class="modal-content">
+    <span onclick="closeModal()" style="float:right;cursor:pointer;">❌</span>
+    <h3>📝 Apply</h3>
+    <input type="text" id="username" placeholder="Your Name">
+    <input type="file">
+    <button onclick="submitApplication()">Submit</button>
+  </div>
+</div>
+
+<!-- Login Modal -->
+
+<div class="modal" id="loginModal">
+  <div class="modal-content">
+    <span onclick="closeLogin()" style="float:right;cursor:pointer;">❌</span>
+    <h3>🔐 Login</h3>
+    <input type="text" id="loginUser" placeholder="Username">
+    <input type="password" id="loginPass" placeholder="Password">
+    <button onclick="login()">Login</button>
+  </div>
+</div>
+
+<!-- Register Modal -->
+
+<div class="modal" id="registerModal">
+  <div class="modal-content">
+    <span onclick="closeRegister()" style="float:right;cursor:pointer;">❌</span>
+    <h3>🆕 Register</h3>
+    <input type="text" id="regUser" placeholder="Username">
+    <input type="password" id="regPass" placeholder="Password">
+    <button onclick="register()">Register</button>
+  </div>
+</div>
+
+<script>
+const jobs = [
+  {
+    title:"Frontend Developer",
+    company:"Infosys",
+    location:"Pune",
+    salary:"4-6 LPA",
+    type:"Full-time",
+    description:"Build UI using React",
+    skills:["HTML","CSS","JavaScript","React"]
+  },
+  {
+    title:"Backend Developer",
+    company:"TCS",
+    location:"Mumbai",
+    salary:"5-8 LPA",
+    type:"Remote",
+    description:"Work on APIs",
+    skills:["Node.js","Express","MongoDB","REST"]
+  },
+  {
+    title:"UI Designer",
+    company:"Wipro",
+    location:"Bangalore",
+    salary:"3-5 LPA",
+    type:"Full-time",
+    description:"Design modern UI",
+    skills:["Figma","Adobe XD","Wireframing","Prototyping"]
+  }
+];
+
+let currentButton=null;
+
+function displayJobs(list){
+  const jobList=document.getElementById("jobList");
+  jobList.innerHTML="";
+  list.forEach(job=>{
+    jobList.innerHTML+=`
+    <div class="job">
+      <h3>💻 ${job.title}</h3>
+      <p>🏢 ${job.company}</p>
+      <p>📍 ${job.location} | 💰 ${job.salary}</p>
+      <span class="tag">${job.type}</span>
+      <p>🛠️ <b>Skills:</b> ${job.skills.join(", ")}</p>
+      <p>📄 ${job.description}</p>
+      <button class="apply-btn" onclick="apply(event,this)">Apply</button>
+    </div>`;
+  });
+}
+
+function filterJobs(){
+  const t=document.getElementById("title").value.toLowerCase();
+  const l=document.getElementById("location").value.toLowerCase();
+  const filtered=jobs.filter(j=>j.title.toLowerCase().includes(t)&&j.location.toLowerCase().includes(l));
+  displayJobs(filtered);
+}
+
+function apply(e,btn){
+  e.stopPropagation();
+  if(!localStorage.getItem("user")){
+    alert("Login first");
+    openLogin();
+    return;
+  }
+  currentButton=btn;
+  document.getElementById("modal").style.display="flex";
+}
+
+function submitApplication(){
+  if(document.getElementById("username").value===""){alert("Enter name");return;}
+  closeModal();
+  currentButton.innerText="Applied ✓";
+}
+
+function closeModal(){document.getElementById("modal").style.display="none";}
+
+function openLogin(){document.getElementById("loginModal").style.display="flex";}
+function closeLogin(){document.getElementById("loginModal").style.display="none";}
+function openRegister(){document.getElementById("registerModal").style.display="flex";}
+function closeRegister(){document.getElementById("registerModal").style.display="none";}
+
+function register(){
+  localStorage.setItem("user",document.getElementById("regUser").value);
+  localStorage.setItem("pass",document.getElementById("regPass").value);
+  alert("Registered!");
+  closeRegister();
+}
+
+function login(){
+  if(document.getElementById("loginUser").value===localStorage.getItem("user") &&
+     document.getElementById("loginPass").value===localStorage.getItem("pass")){
+    showUser(localStorage.getItem("user"));
+    closeLogin();
+  } else alert("Invalid");
+}
+
+function showUser(u){
+  document.getElementById("authSection").innerHTML=
+  `Welcome ${u} | <span onclick="logout()">Logout</span>`;
+}
+
+function logout(){location.reload();}
+
+window.onclick=function(e){
+  if(e.target.classList.contains("modal")) e.target.style.display="none";
+}
+
+displayJobs(jobs);
+</script>
+
+</body>
+</html>
